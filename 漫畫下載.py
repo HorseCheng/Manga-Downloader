@@ -14,6 +14,7 @@ web = {
     "擅長捉弄人的原高木同學": "shanchangzhuonongrendeyuangaomutongxue",
     "擅長捉弄人的高木同學": "shanchangzhuonongdegaomutongxue",
     "進擊的巨人": "jinjidejuren",
+    "約定的夢幻島": "yuedingdemenghuandao",
 }
 
 
@@ -45,31 +46,41 @@ def downloader():
     output = output.split(",")
     print("共", len(output), "頁")
 
-    if not os.path.exists(request + "/" + str(page)):
-        os.makedirs(request + "/" + str(page))
-
+    if not os.path.exists("漫畫/"+request + "/" + str(page)):
+        os.makedirs("漫畫/"+request + "/" + str(page))
     for i in range(len(output)):
-        with open(request + "/" + str(page) + "/" + str(i) + ".jpg", "wb") as f:
-            if "http" in output[i]:
-                response = requests.get(output[i], stream=True)
-                for block in response.iter_content(1024):
-                    if not block:
-                        break
-                    f.write(block)
-            else:
-                path = (
-                    re.search('chapterPath = .*/";var chapterPrice', html.text)
-                    .group()
-                    .replace('chapterPath = "', "")
-                    .replace('";var chapterPrice', "")
-                )
-                response = requests.get(
-                    "http://mhcdn.manhuazj.com/" + path + output[i], stream=True
-                )
-                for chunk in response.iter_content(1024):
-                    if chunk:
-                        f.write(chunk)
-        print("第", i, "頁下載完成\r", end="")
+        with open("漫畫/"+request + "/" + str(page) + "/" + str(i) + ".jpg", "wb") as f:
+            while True:
+                try:
+                    if "http" in output[i]:
+                        output[i] = output[i].replace("%", "%25")
+                        response = requests.get(
+                            "http://mhimg.eshanyao.com/showImage.php?url=" + output[i],
+                            stream=True,
+                        )
+                        for block in response.iter_content(1024):
+                            if not block:
+                                break
+                            f.write(block)
+                    else:
+                        path = (
+                            re.search('chapterPath = .*/";var chapterPrice', html.text)
+                            .group()
+                            .replace('chapterPath = "', "")
+                            .replace('";var chapterPrice', "")
+                        )
+                        response = requests.get(
+                            "http://mhcdn.manhuazj.com/" + path + output[i], stream=True
+                        )
+                        for chunk in response.iter_content(1024):
+                            if chunk:
+                                f.write(chunk)
+                    break
+                except Exception as e:
+                    print(e)
+                    continue
+
+        print("第", i, "頁下載完成")
     print("\n已完成下載", page)
 
 
@@ -84,7 +95,8 @@ if __name__ == "__main__":
         html = requests.get("http://www.manhuadui.com/manhua/" + web[i] + "/")
         soup = BeautifulSoup(html.text, "lxml")
 
-        timestamp = re.search("201[0-9\- ]+\:[0-9]+", html.text).group()
+        timestamp = re.search("20[0-9\- ]+\:[0-9]+", html.text).group()
+        
 
         filterlist = soup.find_all("div", {"class", "zj_list autoHeight"})
         savehtml[i] = filterlist
