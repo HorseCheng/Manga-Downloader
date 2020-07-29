@@ -8,13 +8,12 @@ import os
 import pyaes
 
 web = {
-    "鬼滅之刃": "guimiezhiren",
     "一拳超人": "yiquanchaoren",
     "錢進球場": "qianjinqiuchang",
     "擅長捉弄人的原高木同學": "shanchangzhuonongrendeyuangaomutongxue",
     "擅長捉弄人的高木同學": "shanchangzhuonongdegaomutongxue",
     "進擊的巨人": "jinjidejuren",
-    "約定的夢幻島": "yuedingdemenghuandao",
+    "搖曳露營": "yaoyeluying",
 }
 
 
@@ -32,7 +31,7 @@ def downloader():
     )
     ciphertext = base64.b64decode(ciphertext)
     decrypter = pyaes.Decrypter(
-        pyaes.AESModeOfOperationCBC(b"123456781234567G", b"ABCDEF1G34123412")
+        pyaes.AESModeOfOperationCBC(b"1739ZAQ12345bbG1", b"ABCDEF1G341234bb")
     )
     decrypted = decrypter.feed(ciphertext)
     decrypted += decrypter.feed()
@@ -46,16 +45,16 @@ def downloader():
     output = output.split(",")
     print("共", len(output), "頁")
 
-    if not os.path.exists("漫畫/"+request + "/" + str(page)):
-        os.makedirs("漫畫/"+request + "/" + str(page))
+    if not os.path.exists("漫畫/" + request + "/" + str(page)):
+        os.makedirs("漫畫/" + request + "/" + str(page))
     for i in range(len(output)):
-        with open("漫畫/"+request + "/" + str(page) + "/" + str(i) + ".jpg", "wb") as f:
+        with open("漫畫/" + request + "/" + str(page) + "/" + str(i) + ".jpg", "wb") as f:
             while True:
                 try:
                     if "http" in output[i]:
                         output[i] = output[i].replace("%", "%25")
                         response = requests.get(
-                            "http://mhimg.eshanyao.com/showImage.php?url=" + output[i],
+                            "http://img01.eshanyao.com/showImage.php?url=" + output[i],
                             stream=True,
                         )
                         for block in response.iter_content(1024):
@@ -70,7 +69,7 @@ def downloader():
                             .replace('";var chapterPrice', "")
                         )
                         response = requests.get(
-                            "http://mhcdn.manhuazj.com/" + path + output[i], stream=True
+                            "http://img01.eshanyao.com/" + path + output[i], stream=True
                         )
                         for chunk in response.iter_content(1024):
                             if chunk:
@@ -92,11 +91,13 @@ if __name__ == "__main__":
     sectionword = {}
 
     for i in web:
-        html = requests.get("http://www.manhuadui.com/manhua/" + web[i] + "/")
+        html = requests.get("http://www.manhuabei.com/manhua/" + web[i] + "/")
         soup = BeautifulSoup(html.text, "lxml")
 
-        timestamp = re.search("20[0-9\- ]+\:[0-9]+", html.text).group()
-        
+        try:
+            timestamp = re.search("20[0-9\- ]+\:[0-9]+", html.text).group()
+        except Exception as e:
+            print(i, "讀取錯誤\n", e)
 
         filterlist = soup.find_all("div", {"class", "zj_list autoHeight"})
         savehtml[i] = filterlist
@@ -135,6 +136,7 @@ if __name__ == "__main__":
 
         section = 1
         num = int(input("\n請輸入下載漫畫的編號: "))
+
         for i in web:
             if str(i) in str(orderlist[num - 1]):
                 request = i
