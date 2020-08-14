@@ -12,6 +12,7 @@
 - time
 - base64
 - pyaes
+- execjs
 
 ## 漫畫來源
  [漫畫堆](https://www.manhuadui.com/) (https://www.manhuadui.com/)
