@@ -6,7 +6,7 @@ import base64
 from collections import OrderedDict
 import os
 import pyaes
-import execjs
+import js2py
 
 web = {
     "一拳超人": "yiquanchaoren",
@@ -31,24 +31,29 @@ def downloader():
         .replace('";var chapterPath', "")
     )
     ciphertext = base64.b64decode(ciphertext)
-    
-    #find Secret Key and Initial Value
-    x=re.search('/js/decrypt[0-9]+.js',html.text).group(0)
-    s=requests.get("https://www.manhuabei.com"+x).text
-    function=s
-    ivEncrypted=re.findall("iv':(_.*?),", s)[0] #_0x1c8ae7
-    ivSearchKey=re.findall('var '+ivEncrypted+".*?\['parse'\].*?\[(.*?\'\))\]\);", s)[0]  #_0x4936('2d','OO8Z')
-    ivSearchValue = execjs.compile(function).eval(ivSearchKey) #TOtFq
-    ivSearchKey2=re.findall(ivSearchValue+"':(_.*?)};",s)[0] #_0x4936('22', 'CA]!')
-    iv=execjs.compile(function).eval(ivSearchKey2) #ABCDEF1G344321bb
-    
-    secretkeyEncrypted=re.findall("chapterImages,(.*?),",s)[0] #_0xd4450f
-    secretkeySearchKey=re.findall('var '+secretkeyEncrypted+".*?\['enc'\].*?\((_.*?\))\);", s)[0]  #_0x4936('30','eo!$')
-    secretkey=execjs.compile(function).eval(secretkeySearchKey) #1739ZAQ54321bbG1
-    #print(secretkey) #1739ZAQ54321bbG1
-    
+
+    # find Secret Key and Initial Value
+    x = re.search("/js/decrypt[0-9]+.js", html.text).group(0)
+    s = requests.get("https://www.manhuabei.com" + x).text
+    function = s
+    ivEncrypted = re.findall("iv':(_.*?),", s)[0]  # _0x1c8ae7
+    ivSearchKey = re.findall(
+        "var " + ivEncrypted + ".*?\['parse'\].*?\[(.*?'\))\]\);", s
+    )[0]  # _0x4936('2d','OO8Z')
+    ivSearchValue = js2py.eval_js(function+ivSearchKey)  # TOtFq
+    ivSearchKey2 = re.findall(ivSearchValue + "':(_.*?)};", s)[0]  # _0x4936('22', 'CA]!')
+    iv = js2py.eval_js(function+ivSearchKey2)  # ABCDEF1G344321bb
+   
+    secretkeyEncrypted = re.findall("chapterImages,(.*?),", s)[0]  # _0xd4450f
+    secretkeySearchKey = re.findall(
+        "var " + secretkeyEncrypted + ".*?\['enc'\].*?\((_.*?\))\);", s
+    )[0]  # _0x4936('30','eo!$')
+    secretkey = js2py.eval_js(function+secretkeySearchKey)  # 1739ZAQ54321bbG1
+
     decrypter = pyaes.Decrypter(
-        pyaes.AESModeOfOperationCBC(secretkey.encode(encoding="utf-8"), iv.encode(encoding="utf-8"))
+        pyaes.AESModeOfOperationCBC(
+            secretkey.encode(encoding="utf-8"), iv.encode(encoding="utf-8")
+        )
     )
     decrypted = decrypter.feed(ciphertext)
     decrypted += decrypter.feed()
