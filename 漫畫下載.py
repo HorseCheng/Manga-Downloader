@@ -36,19 +36,17 @@ def downloader():
     x = re.search("/js/decrypt[0-9]+.js", html.text).group(0)
     s = requests.get("https://www.manhuabei.com" + x).text
     function = s
-    ivEncrypted = re.findall("iv':(_.*?),", s)[0]  # _0x1c8ae7
-    ivSearchKey = re.findall(
-        "var " + ivEncrypted + ".*?\['parse'\].*?\[(.*?'\))\]\);", s
-    )[0]  # _0x4936('2d','OO8Z')
-    ivSearchValue = js2py.eval_js(function+ivSearchKey)  # TOtFq
-    ivSearchKey2 = re.findall(ivSearchValue + "':(_.*?)};", s)[0]  # _0x4936('22', 'CA]!')
-    iv = js2py.eval_js(function+ivSearchKey2)  # ABCDEF1G344321bb
-   
-    secretkeyEncrypted = re.findall("chapterImages,(.*?),", s)[0]  # _0xd4450f
-    secretkeySearchKey = re.findall(
-        "var " + secretkeyEncrypted + ".*?\['enc'\].*?\((_.*?\))\);", s
-    )[0]  # _0x4936('30','eo!$')
-    secretkey = js2py.eval_js(function+secretkeySearchKey)  # 1739ZAQ54321bbG1
+
+    ivEncrypted = re.findall("iv':(_.*?),", s)[0]  # _0x28ee89
+    ivSearchKey1 = re.findall(
+        "var " + ivEncrypted + ".*?\['parse'\].*?('.*?')\]\);", s
+    )[0]  # 'VZoxi'
+    ivSearchKey2 = re.findall(ivSearchKey1 + ".*?(_.*?)};", s)[0]  # _0x1632('0','vMr8')
+    iv = js2py.eval_js(function + ivSearchKey2)  # A1B2C3DEF1G321o8
+
+    secretkeyEncrypted = re.findall("chapterImages,(.*?),", s)[0]  # _0x572aa3
+    secretkeySearchKey = re.findall("var " + secretkeyEncrypted + ".*?\((_.*?)\);", s)[0]  # _0x1632('4','s^a[')
+    secretkey = js2py.eval_js(function + secretkeySearchKey)  # KA58ZAQ321oobbG8
 
     decrypter = pyaes.Decrypter(
         pyaes.AESModeOfOperationCBC(
