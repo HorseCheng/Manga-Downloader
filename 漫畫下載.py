@@ -178,12 +178,12 @@ if __name__ == "__main__":
 
         if page == "latest":
             page = latestname
-            url = "http://www.manhuadui.com" + str(latesturl)
+            url = "http://www.manhuabei.com" + str(latesturl)
             downloader()
         elif page == "all":
             for i in chosen:
                 page = i
-                url = "http://www.manhuadui.com" + chosen[i]
+                url = "http://www.manhuabei.com" + chosen[i]
                 downloader()
         else:
             matchstring = []
@@ -200,7 +200,7 @@ if __name__ == "__main__":
                         print()
                 temp = int(input("\n請選擇要下載的檔案: "))
                 page = matchstring[temp]
-            url = "http://www.manhuadui.com" + chosen[page.strip()]
+            url = "http://www.manhuabei.com" + chosen[page.strip()]
             downloader()
         check = input("\n是否繼續下載 (y/n): ")
     print("已結束程式...")
